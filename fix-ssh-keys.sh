@@ -29,7 +29,7 @@ print_error() {
 
 # Check if we're in the pi-shell directory
 if [ ! -f "config.yml" ]; then
-    print_error "This script must be run from the pi-shell directory"
+    print_error "This script must be run from the pi-bridge directory"
     exit 1
 fi
 
