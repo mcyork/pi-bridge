@@ -42,7 +42,7 @@ This will install:
     
     ```bash
     # Add this line to your ~/.zshrc (Mac) or ~/.bashrc (Linux)
-    export PATH="$PATH:/Users/yourusername/projects/pi-shell/scripts"
+    export PATH="$PATH:/Users/yourusername/projects/pi-bridge/scripts"
     
     # Then reload your shell configuration
     source ~/.zshrc  # or source ~/.bashrc
