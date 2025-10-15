@@ -147,3 +147,7 @@ The tool determines which Pi to connect to in the following order of priority:
 - If you plan to use this tool with production Linux machines or systems with sensitive credentials, be aware that there is no encryption on the YAML configuration file.
 - For better security in production environments, consider using SSH key-based authentication instead (use the `--key` parameter when adding a Pi).
 
+## 🤖 AI Disclosure
+
+AI was used to help write this code, specifically the tool [Cursor](https://cursor.com), which assisted with development, documentation, and code organization.
+
