@@ -7,6 +7,8 @@ import sys
 import time
 import subprocess
 from pathlib import Path
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
 
 
 class PiBridge:
@@ -125,7 +127,7 @@ class PiBridge:
 def detect_pi_from_symlink():
     """
     Detect which Pi to use based on the symlink name.
-    Returns the Pi identifier (e.g., 'pi1', 'pi2') or None if not a symlink.
+    Returns the Pi identifier (e.g., 'pi1', 'keybird') or None if not a symlink.
     """
     try:
         # Get the actual script path (resolving symlinks)
@@ -136,13 +138,9 @@ def detect_pi_from_symlink():
         symlink_name = os.path.basename(sys.argv[0])
         
         # If they're different, we're running from a symlink
-        if script_name != symlink_name:
-            # Extract Pi identifier from symlink name
-            # Expected format: pi1, pi2, etc.
-            if symlink_name.startswith('pi') and symlink_name[2:].isdigit():
-                return symlink_name
-            elif symlink_name == 'pi':
-                return 'pi1'  # Default to pi1 if just 'pi'
+        # The symlink name is the Pi identifier
+        if script_name != symlink_name and script_name == 'pi_bridge':
+            return symlink_name
         
         return None
     except Exception:
@@ -159,11 +157,12 @@ def get_config_path(args):
 def load_config(config_path):
     cfg_file = Path(config_path)
     if not cfg_file.exists():
-        # Create a default config if it doesn't exist
-        default_config = {'default': 'pi1', 'pi1': {'host': '192.168.1.10', 'user': 'pi'}}
-        save_config(config_path, default_config)
-        print(f"Created default config file at {config_path}")
-        return default_config
+        # Create an empty config if it doesn't exist
+        empty_config = {}
+        save_config(config_path, empty_config)
+        print(f"Created empty config file at {config_path}")
+        print(f"Use 'pi_bridge add' to add your first Pi.")
+        return empty_config
     with open(cfg_file, "r") as f:
         return yaml.safe_load(f) or {}
 
@@ -172,21 +171,143 @@ def save_config(config_path, config):
         yaml.dump(config, f, default_flow_style=False)
 
 
+def get_pi_bridge_key_path():
+    """Get the path to the pi-bridge SSH key"""
+    return Path.home() / ".ssh" / "pi-bridge"
+
+
+def generate_pi_bridge_key():
+    """Generate SSH key pair for pi-bridge using cryptography library"""
+    key_path = get_pi_bridge_key_path()
+    
+    # Check if key already exists
+    if key_path.exists():
+        print(f"SSH key already exists at {key_path}")
+        return str(key_path)
+    
+    # Ensure .ssh directory exists
+    ssh_dir = key_path.parent
+    ssh_dir.mkdir(mode=0o700, exist_ok=True)
+    
+    print(f"Generating SSH key pair for pi-bridge...")
+    
+    # Generate ED25519 key pair
+    private_key = ed25519.Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
+    
+    # Save private key
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.OpenSSH,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    with open(key_path, 'wb') as f:
+        f.write(private_pem)
+    key_path.chmod(0o600)
+    
+    # Save public key in OpenSSH format
+    public_openssh = public_key.public_bytes(
+        encoding=serialization.Encoding.OpenSSH,
+        format=serialization.PublicFormat.OpenSSH
+    )
+    pub_key_path = Path(str(key_path) + ".pub")
+    with open(pub_key_path, 'wb') as f:
+        f.write(public_openssh + b' pi-bridge-tool\n')
+    pub_key_path.chmod(0o644)
+    
+    print(f"✅ Generated SSH key pair:")
+    print(f"   Private: {key_path}")
+    print(f"   Public:  {pub_key_path}")
+    
+    return str(key_path)
+
+
+def push_ssh_key_to_pi(host, user, password, key_path):
+    """Push public key to Pi's authorized_keys using paramiko"""
+    pub_key_path = Path(str(key_path) + ".pub")
+    
+    # Read the public key
+    with open(pub_key_path, 'r') as f:
+        pub_key = f.read().strip()
+    
+    print(f"Pushing SSH key to {user}@{host}...")
+    
+    # Connect with password
+    bridge = PiBridge(host=host, user=user, password=password)
+    if not bridge.connect():
+        print(f"❌ Could not connect to {host}", file=sys.stderr)
+        return False
+    
+    try:
+        # Create .ssh directory if it doesn't exist
+        bridge.run('mkdir -p ~/.ssh')
+        bridge.run('chmod 700 ~/.ssh')
+        
+        # Create authorized_keys if it doesn't exist
+        bridge.run('touch ~/.ssh/authorized_keys')
+        bridge.run('chmod 600 ~/.ssh/authorized_keys')
+        
+        # Check if key already exists to avoid duplicates
+        out, _ = bridge.run(f'grep -F "{pub_key.split()[0]}" ~/.ssh/authorized_keys 2>/dev/null || echo "not_found"')
+        
+        if 'not_found' in out:
+            # Append public key to authorized_keys
+            bridge.run(f'echo "{pub_key}" >> ~/.ssh/authorized_keys')
+            print(f"✅ SSH key added to {host}")
+        else:
+            print(f"ℹ️  SSH key already exists on {host}")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Error pushing key: {e}", file=sys.stderr)
+        return False
+    finally:
+        bridge.close()
+
+
 def handle_add(args):
     config_path = get_config_path(args)
     config = load_config(config_path)
     if args.name in config:
         print(f"Warning: Pi '{args.name}' already exists. Overwriting.")
     
+    # Handle --push-key flag
+    key_to_use = args.key
+    if args.push_key:
+        # Generate or get existing pi-bridge key
+        key_to_use = generate_pi_bridge_key()
+        
+        # Need password to push the key
+        password_for_push = args.password
+        if not password_for_push:
+            try:
+                password_for_push = getpass.getpass(
+                    f"Enter password for {args.user}@{args.host} (needed to push SSH key): "
+                )
+            except (EOFError, KeyboardInterrupt):
+                print("\nCancelled.", file=sys.stderr)
+                sys.exit(1)
+        
+        # Push the key to the Pi
+        if push_ssh_key_to_pi(args.host, args.user, password_for_push, key_to_use):
+            print(f"✅ Key-based authentication configured for {args.name}")
+        else:
+            print(f"⚠️  Failed to push key, falling back to password authentication", file=sys.stderr)
+    
     config[args.name] = {
         'host': args.host,
         'user': args.user
     }
-    if args.password:
+    
+    # Store key or password
+    if key_to_use:
+        config[args.name]['key'] = key_to_use
+        if not args.push_key:
+            # User provided a custom key path
+            print(f"Using SSH key: {key_to_use}")
+    elif args.password:
         print("Warning: Saving password in plain text in config.yml.")
         config[args.name]['password'] = args.password
-    if args.key:
-        config[args.name]['key'] = args.key
 
     save_config(config_path, config)
     print(f"Pi '{args.name}' added to {config_path}")
@@ -227,13 +348,18 @@ def handle_list(args):
     config = load_config(config_path)
     default_pi = config.get('default')
     
+    # Check if there are any Pis configured (excluding 'default' key)
+    pi_list = {k: v for k, v in config.items() if k != 'default'}
+    
+    if not pi_list:
+        print("No Pis configured.")
+        print("Use 'pi_bridge add <name> --host <host> --user <user> --password <password> [--push-key]' to add a Pi.")
+        return
+    
     print(f"{ 'Name':<10} { 'Host':<20} { 'User':<10} { 'Default':<10} {'Default Path':<30}")
     print("="*80)
     
-    for name, pi_config in config.items():
-        if name == 'default':
-            continue
-        
+    for name, pi_config in pi_list.items():
         is_default = "Yes" if name == default_pi else ""
         host = pi_config.get('host', 'N/A')
         user = pi_config.get('user', 'N/A')
@@ -276,6 +402,11 @@ def handle_status(args):
         pi_to_check.append(args.name)
     else:
         pi_to_check = [k for k in config.keys() if k != 'default']
+
+    if not pi_to_check:
+        print("No Pis configured.")
+        print("Use 'pi_bridge add <name> --host <host> --user <user> --password <password> [--push-key]' to add a Pi.")
+        return
 
     print(f"{ 'Name':<10} { 'Host':<20} { 'Hostname':<20} { 'Status':<10}")
     print("="*60)
@@ -405,6 +536,8 @@ def main():
     p_add.add_argument("--user", required=True, help="SSH username")
     p_add.add_argument("--password", help="SSH password (will be stored in plain text)")
     p_add.add_argument("--key", help="Path to SSH private key")
+    p_add.add_argument("--push-key", action="store_true", 
+                       help="Generate (if needed) and push pi-bridge SSH key to the Pi for password-less authentication")
     p_add.set_defaults(func=handle_add)
 
     p_remove = subparsers.add_parser("remove", help="Remove a Pi from the configuration")

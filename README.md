@@ -13,14 +13,33 @@ pip install -r requirements.txt
 This will install:
 - `paramiko` - SSH library for Python
 - `PyYAML` - YAML configuration file parser
+- `cryptography` - For SSH key generation
 
 ## 🚀 Quick Start
 
-1.  **Configure a Pi:**
+### Option 1: SSH Key Authentication (Recommended)
+
+1.  **Configure a Pi with automatic key setup:**
+    ```bash
+    ./pi_bridge add pi1 --host 192.168.1.10 --user pi --password raspberry --push-key
+    ```
+    This will:
+    - Generate an SSH key pair at `~/.ssh/pi-bridge` (if it doesn't exist)
+    - Push the public key to the Pi for password-less authentication
+    - Save the configuration to `config.yml` with the key path
+    - Create a `./pi1` symlink for easy access
+    
+    **Benefits:** No passwords stored in config, more secure, no password prompts!
+
+### Option 2: Password Authentication
+
+1.  **Configure a Pi with password:**
     ```bash
     ./pi_bridge add pi1 --host 192.168.1.10 --user pi --password raspberry
     ```
     This command saves the new Pi to `config.yml` and creates a `./pi1` symlink for easy access.
+    
+    **Note:** Password will be stored in plain text in `config.yml`.
 
 2.  **Check its status:**
     ```bash
@@ -82,7 +101,9 @@ These commands perform actions on a target Pi.
 
 These commands help you manage your list of Pis.
 
--   `add <name> --host <host> --user <user> --password <password>`: Add a new Pi. Creates a symlink.
+-   `add <name> --host <host> --user <user> --password <password> [--push-key]`: Add a new Pi. Creates a symlink.
+    - Use `--push-key` to automatically set up SSH key authentication (recommended - password used once to push key, then not stored)
+    - Without `--push-key`, password is stored in config for ongoing authentication (less secure)
 -   `remove <name>`: Remove a Pi. Deletes the symlink.
 -   `list`: Show all configured Pis in a table.
 -   `set-default <name>`: Set the default Pi for commands.
@@ -96,7 +117,10 @@ These commands help you manage your list of Pis.
 # Check if all Pis are online
 ./pi_bridge status
 
-# Add a new Pi named 'pi-hole'
+# Add a new Pi named 'pi-hole' with SSH key authentication (recommended)
+./pi_bridge add pi-hole --host 192.168.1.20 --user admin --password raspberry --push-key
+
+# Or add with password authentication only
 ./pi_bridge add pi-hole --host 192.168.1.20 --user admin --password raspberry
 
 # Set it as the default
@@ -107,16 +131,44 @@ These commands help you manage your list of Pis.
 
 Device details are stored in `config.yml`. While you can edit it manually, it's recommended to use the `add` and `remove` commands.
 
+**Note:** You can mix and match authentication methods - some Pis can use SSH keys while others use passwords.
+
+### Example:
 ```yaml
 pi1:
   host: 192.168.1.10
   user: pi
-  password: raspberry
-pi-hole:
+  key: /Users/yourusername/.ssh/pi-bridge  # SSH key authentication (recommended)
+pi2:
   host: 192.168.1.20
-  user: admin
-  password: raspberry
-default: pi-hole
+  user: pi
+  password: raspberry  # Password authentication
+default: pi1
+```
+
+## 🔑 SSH Key Authentication
+
+The tool can automatically set up SSH key-based authentication, which is more secure and convenient than passwords.
+
+### How It Works:
+1. When you use `--push-key` with the `add` command, the tool:
+   - Generates an ED25519 SSH key pair at `~/.ssh/pi-bridge` (if it doesn't exist)
+   - Connects to the Pi using the provided password (one time only)
+   - Copies the public key to the Pi's `~/.ssh/authorized_keys`
+   - Saves the key path in `config.yml`
+
+2. All future connections use the SSH key automatically - no password needed!
+
+### Benefits:
+- ✅ **More Secure:** No passwords stored in plain text
+- ✅ **Convenient:** No password prompts during operations
+- ✅ **One Key for All:** Same key can be used for all your Pis
+- ✅ **LLM-Friendly:** No interactive password prompts when used by AI assistants
+
+### Manual Key Setup:
+If you prefer to use your own SSH key:
+```bash
+./pi_bridge add pi1 --host 192.168.1.10 --user pi --key ~/.ssh/id_rsa
 ```
 
 ## 🎯 How It Works
