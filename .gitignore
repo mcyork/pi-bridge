@@ -4,6 +4,12 @@ __pycache__/
 *$py.class
 *.so
 
+# Build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
 # Virtual environments
 venv/
 env/
@@ -26,3 +32,11 @@ Thumbs.db
 .pytest_cache/
 .mypy_cache/
 
+# Local configuration (contains user-specific paths and potentially sensitive info)
+config.yml
+
+# Scripts directory (created by old repo-based setup, not needed with pip install)
+scripts/
+
+# Maintainer-only documentation (not needed by users or contributors)
+docs/PYPI_PUBLISHING.md

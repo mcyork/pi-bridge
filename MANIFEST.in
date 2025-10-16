@@ -1,0 +1,16 @@
+# Include documentation files
+include README.md
+include LICENSE
+include requirements.txt
+include config.yml.example
+
+# Include documentation directory
+recursive-include docs *.md
+recursive-include docs *.sh
+
+# Exclude development and cache files
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+

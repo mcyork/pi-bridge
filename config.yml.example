@@ -1,9 +1,20 @@
+# Pi Bridge Configuration Example
+# 
+# This file should be located at: ~/.config/pi-bridge/config.yml
+# (Each user has their own config in their home directory)
+#
+# You can mix and match authentication methods
+
+# Example configuration with SSH key authentication (recommended)
 pi1:
   host: 192.168.1.10
   user: pi
-  password: raspberry
-pi-hole:
+  key: ~/.ssh/pi-bridge
+
+# Example configuration with password authentication
+pi2:
   host: 192.168.1.20
-  user: admin
+  user: pi
   password: raspberry
-default: pi-hole
+
+default: pi1

@@ -18,7 +18,16 @@ First off, thank you for considering contributing to Pi Bridge!
 - Issue that pull request!
 
 ## Styleguides
-- Use Black for code formatting.
-- Follow PEP 8 conventions.
+
+### Code Style
+- **Formatting**: Code is formatted with [Black](https://black.readthedocs.io/) (88 char line length)
+- **Python**: Generally follows PEP 8 conventions
+- **Consistency**: Run `black pi_bridge_tool/` before committing
+
+### Before Submitting
+- **Format code**: `black pi_bridge_tool/`
+- **Test locally**: `pip install -e . && pi-bridge --help`
+- **Test functionality**: Add a test Pi and run a command
+- **Check syntax**: `python -m py_compile pi_bridge_tool/main.py`
 
 Thanks again for your contribution!

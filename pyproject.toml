@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pi-bridge"
+version = "1.0.0"
+description = "A CLI tool for managing multiple Raspberry Pi devices over SSH"
+readme = "README.md"
+authors = [
+    {name = "Ian McCutcheon", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+keywords = ["raspberry-pi", "ssh", "remote", "management", "cli", "iot"]
+dependencies = [
+    "paramiko>=2.7.0",
+    "PyYAML>=5.1",
+    "cryptography>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black>=22.0",
+    "flake8>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mcyork/pi-bridge"
+Repository = "https://github.com/mcyork/pi-bridge"
+Issues = "https://github.com/mcyork/pi-bridge/issues"
+
+[project.scripts]
+pi-bridge = "pi_bridge_tool.main:main"
+
+[tool.setuptools]
+packages = ["pi_bridge_tool"]
+
+[tool.setuptools.package-data]
+pi_bridge_tool = ["*.sh", "*.md"]
+
+[tool.black]
+line-length = 88
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310']

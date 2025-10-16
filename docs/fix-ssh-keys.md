@@ -1,8 +1,14 @@
 # Fix SSH Keys Script
 
+> **Note:** This is a legacy bash script. If you've installed pi-bridge via pip, use the built-in command instead:
+> ```bash
+> pi-bridge check-ssh
+> ```
+> The built-in command works with the new config system and is cross-platform.
+
 ## Overview
 
-`fix-ssh-keys.sh` is a utility script that automates fixing SSH host key fingerprint issues when you've reinstalled the OS on a Raspberry Pi or when the Pi's SSH keys have changed.
+`fix-ssh-keys.sh` is a legacy utility script that automates fixing SSH host key fingerprint issues when you've reinstalled the OS on a Raspberry Pi or when the Pi's SSH keys have changed.
 
 ## The Problem It Solves
 
@@ -75,7 +81,7 @@ The script will:
 - After reinstalling Raspberry Pi OS
 - After flashing a new SD card
 - When you see SSH host key verification errors
-- After the `pi_bridge check-ssh` command reports "BAD KEY"
+- After the `pi-bridge check-ssh` command reports "BAD KEY"
 
 ## Limitations
 
@@ -84,10 +90,10 @@ The script will:
 
 ## Alternative Approach
 
-You can also use the built-in `pi_bridge` command:
+You can also use the built-in `pi-bridge` command:
 
 ```bash
-./pi_bridge check-ssh
+pi-bridge check-ssh
 ```
 
 This command checks all Pis and interactively prompts you to fix any host key issues.
