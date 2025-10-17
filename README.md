@@ -4,13 +4,13 @@ A CLI tool for managing multiple Raspberry Pi devices over SSH with automatic Pi
 
 ## 📦 Installation
 
-### Option 1: Install from PyPI (Coming Soon)
+### Recommended: Install from PyPI
 
 ```bash
 pip install pi-shell
 ```
 
-### Option 2: Install from Source
+### Alternative: Install from Source
 
 ```bash
 # Clone the repository
@@ -24,15 +24,7 @@ pip install .
 pip install -e .
 ```
 
-### Option 3: Install from Local Directory
-
-```bash
-# Download and extract, then:
-cd pi-shell
-pip install .
-```
-
-The installation includes all dependencies:
+This automatically installs all dependencies:
 - `paramiko` - SSH library for Python
 - `PyYAML` - YAML configuration file parser
 - `cryptography` - For SSH key generation
