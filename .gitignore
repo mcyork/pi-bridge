@@ -40,3 +40,4 @@ scripts/
 
 # Maintainer-only documentation (not needed by users or contributors)
 docs/PYPI_PUBLISHING.md
+scripts/keybird
