@@ -1,12 +1,12 @@
-# Contributing to Pi Bridge
+# Contributing to Pi Shell
 
-First off, thank you for considering contributing to Pi Bridge!
+First off, thank you for considering contributing to Pi Shell!
 
 ## How Can I Contribute?
 
 ### Reporting Bugs
-- Ensure the bug was not already reported by searching on GitHub under [Issues](https://github.com/mcyork/pi-bridge/issues).
-- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/mcyork/pi-bridge/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
+- Ensure the bug was not already reported by searching on GitHub under [Issues](https://github.com/mcyork/pi-shell/issues).
+- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/mcyork/pi-shell/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
 
 ### Suggesting Enhancements
 - Open a new issue and describe the enhancement you have in mind.
@@ -26,7 +26,7 @@ First off, thank you for considering contributing to Pi Bridge!
 
 ### Before Submitting
 - **Format code**: `black pi_bridge_tool/`
-- **Test locally**: `pip install -e . && pi-bridge --help`
+- **Test locally**: `pip install -e . && pi-shell --help`
 - **Test functionality**: Add a test Pi and run a command
 - **Check syntax**: `python -m py_compile pi_bridge_tool/main.py`
 

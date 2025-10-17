@@ -1,4 +1,4 @@
-# Pi Bridge - Enhanced Raspberry Pi Management Tool
+# Pi Shell - Enhanced Raspberry Pi Management Tool
 
 A CLI tool for managing multiple Raspberry Pi devices over SSH with automatic Pi detection through symlinks.
 
@@ -7,15 +7,15 @@ A CLI tool for managing multiple Raspberry Pi devices over SSH with automatic Pi
 ### Option 1: Install from PyPI (Coming Soon)
 
 ```bash
-pip install pi-bridge
+pip install pi-shell
 ```
 
 ### Option 2: Install from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/mcyork/pi-bridge.git
-cd pi-bridge
+git clone https://github.com/mcyork/pi-shell.git
+cd pi-shell
 
 # Install using pip
 pip install .
@@ -28,7 +28,7 @@ pip install -e .
 
 ```bash
 # Download and extract, then:
-cd pi-bridge
+cd pi-shell
 pip install .
 ```
 
@@ -37,7 +37,7 @@ The installation includes all dependencies:
 - `PyYAML` - YAML configuration file parser
 - `cryptography` - For SSH key generation
 
-After installation, the `pi-bridge` command will be available globally.
+After installation, the `pi-shell` command will be available globally.
 
 ## 🚀 Quick Start
 
@@ -45,12 +45,12 @@ After installation, the `pi-bridge` command will be available globally.
 
 1.  **Configure a Pi with automatic key setup:**
     ```bash
-    pi-bridge add pi1 --host 192.168.1.10 --user pi --password raspberry --push-key
+    pi-shell add pi1 --host 192.168.1.10 --user pi --password raspberry --push-key
     ```
     This will:
-    - Generate an SSH key pair at `~/.ssh/pi-bridge` (if it doesn't exist)
+    - Generate an SSH key pair at `~/.ssh/pi-shell` (if it doesn't exist)
     - Push the public key to the Pi for password-less authentication
-    - Save the configuration to `~/.config/pi-bridge/config.yml` with the key path
+    - Save the configuration to `~/.config/pi-shell/config.yml` with the key path
     
     **Benefits:** No passwords stored in config, more secure, no password prompts!
 
@@ -58,24 +58,24 @@ After installation, the `pi-bridge` command will be available globally.
 
 1.  **Configure a Pi with password:**
     ```bash
-    pi-bridge add pi1 --host 192.168.1.10 --user pi --password raspberry
+    pi-shell add pi1 --host 192.168.1.10 --user pi --password raspberry
     ```
-    This saves the Pi configuration to `~/.config/pi-bridge/config.yml`.
+    This saves the Pi configuration to `~/.config/pi-shell/config.yml`.
     
     **Note:** Password will be stored in plain text in the config file.
 
 2.  **Check its status:**
     ```bash
-    pi-bridge status pi1
+    pi-shell status pi1
     ```
 
 3.  **Run a command:**
     ```bash
     # Using the --pi flag
-    pi-bridge run "uname -a" --pi pi1
+    pi-shell run "uname -a" --pi pi1
     
     # Or if pi1 is set as default
-    pi-bridge run "uname -a"
+    pi-shell run "uname -a"
     ```
 
 ## 🔧 Available Commands
@@ -97,7 +97,7 @@ These commands perform actions on a target Pi.
 ./pi2 run "sudo reboot"
 
 # Read the hostname from the default pi
-./pi-bridge read "/etc/hostname"
+./pi-shell read "/etc/hostname"
 ```
 
 ### Management Actions (`add`, `remove`, `list`, `status`, `set-default`)
@@ -115,27 +115,27 @@ These commands help you manage your list of Pis.
 **Example:**
 ```bash
 # See all configured Pis
-./pi-bridge list
+./pi-shell list
 
 # Check if all Pis are online
-./pi-bridge status
+./pi-shell status
 
 # Add a new Pi named 'pi-hole' with SSH key authentication (recommended)
-./pi-bridge add pi-hole --host 192.168.1.20 --user admin --password raspberry --push-key
+./pi-shell add pi-hole --host 192.168.1.20 --user admin --password raspberry --push-key
 
 # Or add with password authentication only
-./pi-bridge add pi-hole --host 192.168.1.20 --user admin --password raspberry
+./pi-shell add pi-hole --host 192.168.1.20 --user admin --password raspberry
 
 # Set it as the default
-./pi-bridge set-default pi-hole
+./pi-shell set-default pi-hole
 ```
 
 ## ⚙️ Configuration
 
-Device details are stored in `~/.config/pi-bridge/config.yml` (per-user). While you can edit it manually, it's recommended to use the `add` and `remove` commands.
+Device details are stored in `~/.config/pi-shell/config.yml` (per-user). While you can edit it manually, it's recommended to use the `add` and `remove` commands.
 
 **Note:** 
-- Each user has their own config in their home directory (`~/.config/pi-bridge/config.yml`)
+- Each user has their own config in their home directory (`~/.config/pi-shell/config.yml`)
 - This works with system-wide installations - no conflicts between users!
 - You can mix and match authentication methods - some Pis can use SSH keys while others use passwords
 
@@ -144,7 +144,7 @@ Device details are stored in `~/.config/pi-bridge/config.yml` (per-user). While 
 pi1:
   host: 192.168.1.10
   user: pi
-  key: ~/.ssh/pi-bridge  # SSH key authentication (recommended)
+  key: ~/.ssh/pi-shell  # SSH key authentication (recommended)
 pi2:
   host: 192.168.1.20
   user: pi
@@ -158,7 +158,7 @@ The tool can automatically set up SSH key-based authentication, which is more se
 
 ### How It Works:
 1. When you use `--push-key` with the `add` command, the tool:
-   - Generates an ED25519 SSH key pair at `~/.ssh/pi-bridge` (if it doesn't exist)
+   - Generates an ED25519 SSH key pair at `~/.ssh/pi-shell` (if it doesn't exist)
    - Connects to the Pi using the provided password (one time only)
    - Copies the public key to the Pi's `~/.ssh/authorized_keys`
    - Saves the key path in `config.yml`
@@ -174,7 +174,7 @@ The tool can automatically set up SSH key-based authentication, which is more se
 ### Manual Key Setup:
 If you prefer to use your own SSH key:
 ```bash
-./pi-bridge add pi1 --host 192.168.1.10 --user pi --key ~/.ssh/id_rsa
+./pi-shell add pi1 --host 192.168.1.10 --user pi --key ~/.ssh/id_rsa
 ```
 
 ## 🎯 How It Works
@@ -186,7 +186,7 @@ The tool determines which Pi to connect to in the following order of priority:
 
 ## 🆘 Troubleshooting
 
--   **Connection Errors:** Use `./pi-bridge status` to check connectivity. Ensure the host IP is correct and the device is on the network.
+-   **Connection Errors:** Use `./pi-shell status` to check connectivity. Ensure the host IP is correct and the device is on the network.
 -   **Host Key Errors:** If you see a "BadHostKeyException", it means the Pi's SSH key has changed (e.g., after an OS reinstall). The tool will provide you with the correct `ssh-keygen -R <host>` command to run to fix it.
 -   **Authentication Errors:** If you don't store a password in the config, the tool will prompt you for one. For non-interactive use, consider setting up SSH key-based authentication and providing the key path in `config.yml`.
 
@@ -207,15 +207,15 @@ The tool determines which Pi to connect to in the following order of priority:
 
 ## 🗑️ Uninstalling
 
-To uninstall pi-bridge:
+To uninstall pi-shell:
 
 ```bash
-pip uninstall pi-bridge
+pip uninstall pi-shell
 ```
 
 **Note:** This removes the command but preserves your data:
-- Config: `~/.config/pi-bridge/config.yml`
-- SSH keys: `~/.ssh/pi-bridge`
+- Config: `~/.config/pi-shell/config.yml`
+- SSH keys: `~/.ssh/pi-shell`
 - Symlinks: `/usr/local/bin/keybird`, etc.
 
 For complete removal instructions, see [docs/UNINSTALL.md](docs/UNINSTALL.md)

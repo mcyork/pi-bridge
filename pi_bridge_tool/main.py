@@ -135,7 +135,7 @@ def detect_pi_from_symlink():
 
         # If they're different, we're running from a symlink
         # The symlink name is the Pi identifier
-        if script_name != symlink_name and script_name == "pi-bridge":
+        if script_name != symlink_name and script_name == "pi-shell":
             return symlink_name
 
         return None
@@ -148,7 +148,7 @@ def get_config_path(args):
         return Path(args.config)
     # Default config path in user's home directory
     # This ensures each user has their own config, even with system-wide installation
-    return Path.home() / ".config" / "pi-bridge" / "config.yml"
+    return Path.home() / ".config" / "pi-shell" / "config.yml"
 
 
 def load_config(config_path):
@@ -158,7 +158,7 @@ def load_config(config_path):
         empty_config = {}
         save_config(config_path, empty_config)
         print(f"Created empty config file at {config_path}")
-        print(f"Use 'pi-bridge add' to add your first Pi.")
+        print(f"Use 'pi-shell add' to add your first Pi.")
         return empty_config
     with open(cfg_file, "r") as f:
         return yaml.safe_load(f) or {}
@@ -174,12 +174,12 @@ def save_config(config_path, config):
 
 
 def get_pi_bridge_key_path():
-    """Get the path to the pi-bridge SSH key"""
-    return Path.home() / ".ssh" / "pi-bridge"
+    """Get the path to the pi-shell SSH key"""
+    return Path.home() / ".ssh" / "pi-shell"
 
 
 def generate_pi_bridge_key():
-    """Generate SSH key pair for pi-bridge using cryptography library"""
+    """Generate SSH key pair for pi-shell using cryptography library"""
     key_path = get_pi_bridge_key_path()
 
     # Check if key already exists
@@ -191,7 +191,7 @@ def generate_pi_bridge_key():
     ssh_dir = key_path.parent
     ssh_dir.mkdir(mode=0o700, exist_ok=True)
 
-    print(f"Generating SSH key pair for pi-bridge...")
+    print(f"Generating SSH key pair for pi-shell...")
 
     # Generate ED25519 key pair
     private_key = ed25519.Ed25519PrivateKey.generate()
@@ -214,7 +214,7 @@ def generate_pi_bridge_key():
     )
     pub_key_path = Path(str(key_path) + ".pub")
     with open(pub_key_path, "wb") as f:
-        f.write(public_openssh + b" pi-bridge-tool\n")
+        f.write(public_openssh + b" pi-shell-tool\n")
     pub_key_path.chmod(0o644)
 
     print(f"✅ Generated SSH key pair:")
@@ -278,7 +278,7 @@ def handle_add(args):
     # Handle --push-key flag
     key_to_use = args.key
     if args.push_key:
-        # Generate or get existing pi-bridge key
+        # Generate or get existing pi-shell key
         key_to_use = generate_pi_bridge_key()
 
         # Need password to push the key
@@ -320,11 +320,11 @@ def handle_add(args):
     save_config(config_path, config)
     print(f"Pi '{args.name}' added to {config_path}")
 
-    # Create symlink to pi-bridge command
+    # Create symlink to pi-shell command
     try:
         import shutil
 
-        pi_bridge_path = shutil.which("pi-bridge")
+        pi_bridge_path = shutil.which("pi-shell")
         if pi_bridge_path:
             symlink_dir = Path(pi_bridge_path).parent
             symlink_path = symlink_dir / args.name
@@ -339,11 +339,11 @@ def handle_add(args):
                 )
             else:
                 os.symlink(pi_bridge_path, symlink_path)
-                print(f"✅ Created symlink: {args.name} -> pi-bridge")
+                print(f"✅ Created symlink: {args.name} -> pi-shell")
                 print(f"   You can now use: {args.name} run <command>")
         else:
             print(
-                "Note: Could not create symlink (pi-bridge command not found in PATH)"
+                "Note: Could not create symlink (pi-shell command not found in PATH)"
             )
     except Exception as e:
         print(f"Note: Could not create symlink: {e}")
@@ -378,7 +378,7 @@ def handle_list(args):
     if not pi_list:
         print("No Pis configured.")
         print(
-            "Use 'pi-bridge add <name> --host <host> --user <user> --password <password> [--push-key]' to add a Pi."
+            "Use 'pi-shell add <name> --host <host> --user <user> --password <password> [--push-key]' to add a Pi."
         )
         return
 
@@ -435,7 +435,7 @@ def handle_status(args):
     if not pi_to_check:
         print("No Pis configured.")
         print(
-            "Use 'pi-bridge add <name> --host <host> --user <user> --password <password> [--push-key]' to add a Pi."
+            "Use 'pi-shell add <name> --host <host> --user <user> --password <password> [--push-key]' to add a Pi."
         )
         return
 
@@ -597,7 +597,7 @@ def main():
     p_add.add_argument(
         "--push-key",
         action="store_true",
-        help="Generate (if needed) and push pi-bridge SSH key to the Pi for password-less authentication",
+        help="Generate (if needed) and push pi-shell SSH key to the Pi for password-less authentication",
     )
     p_add.set_defaults(func=handle_add)
 
