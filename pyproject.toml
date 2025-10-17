@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pi-shell"
-version = "1.0.2"
+version = "1.0.3"
 description = "A CLI tool for managing multiple Raspberry Pi devices over SSH"
 readme = "README.md"
 authors = [
@@ -50,13 +50,13 @@ Repository = "https://github.com/mcyork/pi-shell"
 Issues = "https://github.com/mcyork/pi-shell/issues"
 
 [project.scripts]
-pi-shell = "pi_bridge_tool.main:main"
+pi-shell = "pi_shell_tool.main:main"
 
 [tool.setuptools]
-packages = ["pi_bridge_tool"]
+packages = ["pi_shell_tool"]
 
 [tool.setuptools.package-data]
-pi_bridge_tool = ["*.sh", "*.md"]
+pi_shell_tool = ["*.sh", "*.md"]
 
 [tool.black]
 line-length = 88

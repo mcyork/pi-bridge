@@ -1,6 +1,6 @@
-# Pi Bridge Configuration Example
+# Pi Shell Configuration Example
 # 
-# This file should be located at: ~/.config/pi-bridge/config.yml
+# This file should be located at: ~/.config/pi-shell/config.yml
 # (Each user has their own config in their home directory)
 #
 # You can mix and match authentication methods
@@ -9,7 +9,7 @@
 pi1:
   host: 192.168.1.10
   user: pi
-  key: ~/.ssh/pi-bridge
+  key: ~/.ssh/pi-shell
 
 # Example configuration with password authentication
 pi2:

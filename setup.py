@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script for pi-bridge package.
+Setup script for pi-shell package.
 Uses pyproject.toml for configuration (PEP 621).
 """
 

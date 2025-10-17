@@ -173,14 +173,14 @@ def save_config(config_path, config):
         yaml.dump(config, f, default_flow_style=False)
 
 
-def get_pi_bridge_key_path():
+def get_pi_shell_key_path():
     """Get the path to the pi-shell SSH key"""
     return Path.home() / ".ssh" / "pi-shell"
 
 
-def generate_pi_bridge_key():
+def generate_pi_shell_key():
     """Generate SSH key pair for pi-shell using cryptography library"""
-    key_path = get_pi_bridge_key_path()
+    key_path = get_pi_shell_key_path()
 
     # Check if key already exists
     if key_path.exists():
@@ -279,7 +279,7 @@ def handle_add(args):
     key_to_use = args.key
     if args.push_key:
         # Generate or get existing pi-shell key
-        key_to_use = generate_pi_bridge_key()
+        key_to_use = generate_pi_shell_key()
 
         # Need password to push the key
         password_for_push = args.password
@@ -324,9 +324,9 @@ def handle_add(args):
     try:
         import shutil
 
-        pi_bridge_path = shutil.which("pi-shell")
-        if pi_bridge_path:
-            symlink_dir = Path(pi_bridge_path).parent
+        pi_shell_path = shutil.which("pi-shell")
+        if pi_shell_path:
+            symlink_dir = Path(pi_shell_path).parent
             symlink_path = symlink_dir / args.name
 
             if os.path.lexists(symlink_path):
@@ -338,7 +338,7 @@ def handle_add(args):
                     f"   Note: Each user's config determines which Pi '{args.name}' connects to"
                 )
             else:
-                os.symlink(pi_bridge_path, symlink_path)
+                os.symlink(pi_shell_path, symlink_path)
                 print(f"✅ Created symlink: {args.name} -> pi-shell")
                 print(f"   You can now use: {args.name} run <command>")
         else:

@@ -6,7 +6,7 @@ from pathlib import Path
 # Add the parent directory to the Python path to allow module imports
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from pi_bridge_tool.main import main
+from pi_shell_tool.main import main
 
 if __name__ == "__main__":
     main()
