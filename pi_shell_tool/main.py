@@ -224,7 +224,7 @@ def generate_pi_shell_key():
     return str(key_path)
 
 
-def push_ssh_key_to_pi(host, user, password, key_path):
+def push_ssh_key_to_pi(host, user, password, key_path, timeout=30):
     """Push public key to Pi's authorized_keys using paramiko"""
     pub_key_path = Path(str(key_path) + ".pub")
 
@@ -234,9 +234,9 @@ def push_ssh_key_to_pi(host, user, password, key_path):
 
     print(f"Pushing SSH key to {user}@{host}...")
 
-    # Connect with password
+    # Connect with password (longer timeout for slow connections)
     bridge = PiBridge(host=host, user=user, password=password)
-    if not bridge.connect():
+    if not bridge.connect(timeout=timeout):
         print(f"❌ Could not connect to {host}", file=sys.stderr)
         return False
 
@@ -293,7 +293,9 @@ def handle_add(args):
                 sys.exit(1)
 
         # Push the key to the Pi
-        if push_ssh_key_to_pi(args.host, args.user, password_for_push, key_to_use):
+        if push_ssh_key_to_pi(
+            args.host, args.user, password_for_push, key_to_use, timeout=args.timeout
+        ):
             print(f"✅ Key-based authentication configured for {args.name}")
         else:
             print(
@@ -473,7 +475,7 @@ def handle_status(args):
         bridge = PiBridge(host=host, user=user, password=password, key_filename=key)
 
         try:
-            if bridge.connect(timeout=3):
+            if bridge.connect(timeout=args.timeout):
                 status = "ONLINE"
                 try:
                     out, err = bridge.run("hostname")
@@ -599,6 +601,12 @@ def main():
         action="store_true",
         help="Generate (if needed) and push pi-shell SSH key to the Pi for password-less authentication",
     )
+    p_add.add_argument(
+        "--timeout",
+        type=int,
+        default=30,
+        help="Connection timeout in seconds for SSH key push (default: 30)",
+    )
     p_add.set_defaults(func=handle_add)
 
     p_remove = subparsers.add_parser(
@@ -625,6 +633,9 @@ def main():
         "status", help="Check the status of configured Pis"
     )
     p_status.add_argument("name", nargs="?", help="Name of a specific Pi to check")
+    p_status.add_argument(
+        "--timeout", type=int, default=3, help="Connection timeout in seconds (default: 3)"
+    )
     p_status.set_defaults(func=handle_status)
 
     p_check_ssh = subparsers.add_parser(

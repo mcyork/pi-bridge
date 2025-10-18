@@ -1,6 +1,6 @@
 # Pi Shell - Enhanced Raspberry Pi Management Tool
 
-A CLI tool for managing multiple Raspberry Pi devices over SSH with automatic Pi detection through symlinks.
+A CLI tool for managing multiple Raspberry Pi devices over SSH with automatic Pi detection through symlinks. But why does this exist [BHB.bzz]https://bhb.buzz/pi-shell.html
 
 ## 📦 Installation
 
